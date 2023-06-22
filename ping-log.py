@@ -37,7 +37,7 @@ def imprimeAssinatura():
 def ping(host):
     try:
         with open(os.devnull, 'w') as devnull:
-            if subprocess.call(['ping', '-n', '1', host], stdout=devnull, stderr=devnull) == 0:
+            if subprocess.call(['ping', '-n', '1',  '-w', '1', host], stdout=devnull, stderr=devnull) == 0:
                 return True
     except subprocess.CalledProcessError:
         pass
