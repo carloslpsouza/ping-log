@@ -3,6 +3,7 @@ import json
 import os
 from time import sleep
 from datetime import datetime
+from assinatura import imprimeAssinatura
 
 with open('config.json') as config_file:
     config_data = json.load(config_file)
@@ -24,15 +25,6 @@ def limparTerminal():
         os.system('cls')
     else:  # Linux, macOS
         os.system('clear')
-
-def imprimeAssinatura():
-    print(60*"=")
-    print ("| Ping Log                                                 |")
-    print(60*"=")
-    print ("| Desenvolvido por: Carlos Souza                           |")
-    print ("| Email: carlosp.souza@gmail.com                           |")
-    print ("| Linkedin: https://www.linkedin.com/in/carloslpsouza/     |")
-    print(60*"=")
 
 def ping(host):
     try:
@@ -65,7 +57,11 @@ def main():
     arq_ips = 'ips'
 
     if not os.path.isfile(arq_offline):
-        escreve_arquivo(arq_offline, [])
+        escreve_arquivo(arq_offline, ['Start in: ' + str(datetime.now()) + '\n'])
+    else:
+        f = open(arq_offline, 'a')
+        f.write('Start again in: ' + str(datetime.now()) + '\n')
+        f.close()
 
     while True:
         verificar_ips(arq_offline, arq_ips)
