@@ -1,70 +1,77 @@
+import subprocess
+import json
+import os
 from time import sleep
-from datetime import datetime, date
-import os, platform
-data = str(datetime.now())
-arq_offline = data[0:9] + '.txt'
-arq_ips = 'ips'
-if os.path.isfile(arq_offline): #Verifica se o arquivo existe e apaga se existir
-    #os.remove(arq_offline)
-    pass
-else:
-    f = open(arq_offline, 'x')
-    f.close()
+from datetime import datetime
 
-def configuracoes():
-    pass
+with open('config.json') as config_file:
+    config_data = json.load(config_file)
 
-global slp
-cfgs = open('config', 'r').readline()
-    
-    
+intervalo = config_data['intervalo']
+prefixo = config_data['prefixo_log']
+
+def le_arquivo(nome_arquivo):
+    with open(nome_arquivo, 'r') as arquivo:
+        linhas = arquivo.readlines()
+    return linhas
+
+def escreve_arquivo(nome_arquivo, conteudo):
+    with open(nome_arquivo, 'w') as arquivo:
+        arquivo.writelines(conteudo)
+
+def limparTerminal():
+    if os.name == 'nt':  # Windows
+        os.system('cls')
+    else:  # Linux, macOS
+        os.system('clear')
+
+def imprimeAssinatura():
+    print(60*"=")
+    print ("| Ping Log                                                 |")
+    print(60*"=")
+    print ("| Desenvolvido por: Carlos Souza                           |")
+    print ("| Email: carlosp.souza@gmail.com                           |")
+    print ("| Linkedin: https://www.linkedin.com/in/carloslpsouza/     |")
+    print(60*"=")
+
 def ping(host):
-    global resposta
-    global encontrado
-    if platform.system().lower() == 'windows':
-        ping_str = " -n 1 -w 1"
-    else:
-        ping_str =" -c 1"
+    try:
+        with open(os.devnull, 'w') as devnull:
+            if subprocess.call(['ping', '-n', '1', host], stdout=devnull, stderr=devnull) == 0:
+                return True
+    except subprocess.CalledProcessError:
+        pass
+    return False
 
-    resposta = os.system("ping" + ping_str + " " + host)
-    def leArquivo():
-        global lines
-        f = open(arq_offline, 'r')
-        lines = f.readlines()
-        f.close()
-    if resposta == 1: #quando esta off
-        leArquivo()
-        encontrado = 0
-        for x in lines:
-            if x == host:
-                encontrado = 1
-                break
+def verificar_ips(arq_offline, arq_ips):
+    ips_offline = le_arquivo(arq_offline)
+    ips = le_arquivo(arq_ips)
 
-        f = open(arq_offline, 'a')
-        if encontrado != 1:
-            timestp = datetime.now()
-            f.write(str(timestp) +' - '+ str(host) + '\n')
-        f.close()
-
-    else: #quando esta on
-        leArquivo()
-        f = open(arq_offline, 'w')
-        for x in lines:
-            if x != host:
-                f.write(x)
-        f.close()
+    ips_offline_novos = []
+    for ip in ips:
+        if not ping(ip.strip()):
+            data = datetime.now()
+            ips_offline_novos.append(str(data) + ' - ' + ip)
+            limparTerminal()
+            imprimeAssinatura()
+            print('Dispositivo fora de rede! ' + str(data) + ' - ' + ip)
     
-    #return resposta == 0
+    conteudo = ips_offline + ips_offline_novos
+    escreve_arquivo(arq_offline, conteudo)
 
-list_ips = open(arq_ips, 'r')
-for x in list_ips:
-    ping(x)
-list_ips.close()
+def main():
+    data = datetime.now().strftime('%Y-%m-%d')
+    arq_offline = f'{prefixo}{data}.txt'
+    arq_ips = 'ips'
 
-while True:
-    list_ips = open(arq_ips, 'r')
-    for x in list_ips:
-        ping(x)
-    list_ips.close()
-    #print(resposta)
-    sleep(int(cfgs))
+    if not os.path.isfile(arq_offline):
+        escreve_arquivo(arq_offline, [])
+
+    while True:
+        verificar_ips(arq_offline, arq_ips)
+        sleep(intervalo)
+
+if __name__ == '__main__':
+    print('Running...')
+    imprimeAssinatura()
+    main()
