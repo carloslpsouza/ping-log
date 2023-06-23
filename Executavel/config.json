@@ -1,4 +1,5 @@
 {
   "intervalo":2,
-  "prefixo_log": "log-"
+  "prefixo_log": "log-", 
+  "diretorio-log": "./log/"
 }
