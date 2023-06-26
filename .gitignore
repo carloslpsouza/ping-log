@@ -1,5 +1,7 @@
 __pycache__
 build/
 dist/
-Executavel/
+#Executavel/
 ping-log.spec
+file-version
+ping-log.ico
