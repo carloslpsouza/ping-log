@@ -5,8 +5,9 @@ from datetime import datetime
 with open('config.json') as config_file:
     config_data = json.load(config_file)
 
-prefixo   = config_data['prefixo_log']
+prefixo = config_data['prefixo_log']
 diretorio = config_data['diretorio-log']
+
 
 def le_arquivo(nome_arquivo, dir=""):
     nome_arquivo = dir + nome_arquivo
@@ -14,19 +15,24 @@ def le_arquivo(nome_arquivo, dir=""):
         linhas = arquivo.readlines()
     return linhas
 
+
 def escreve_arquivo(nome_arquivo, conteudo):
     nome_arquivo = diretorio + nome_arquivo
     with open(nome_arquivo, 'w') as arquivo:
         arquivo.writelines(conteudo)
+
 
 def atualiza_arquivo(nome_arquivo, conteudo):
     nome_arquivo = diretorio + nome_arquivo
     with open(nome_arquivo, 'a') as arquivo:
         arquivo.writelines(conteudo)
 
+
 def trata_diretorio():
-  arquivos = os.listdir(diretorio)
-  return arquivos
+    if not os.path.exists(diretorio):
+        os.makedirs(diretorio)
+    arquivos = os.listdir(diretorio)
+    return arquivos
 
 def gera_novo_arquivo(novo):
   escreve_arquivo(
